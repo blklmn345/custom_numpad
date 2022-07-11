@@ -9,8 +9,12 @@ class NumpadContainer extends StatefulWidget {
     Key? key,
     required this.child,
     required this.show,
-    required this.onNumInput,
     required this.onDelete,
+    this.textStyle,
+    this.onNumInput,
+    this.numButtonBuilder,
+    this.deleteButtonBuilder,
+    this.backgroundColor = Colors.white,
     this.keyboardHeight = 300,
     this.duration = const Duration(milliseconds: 300),
   }) : super(key: key);
@@ -25,14 +29,30 @@ class NumpadContainer extends StatefulWidget {
   ///
   final double keyboardHeight;
 
+  /// Background color of keyboard area.
+  ///
+  final Color backgroundColor;
+
+  /// Button text style.
+  /// 
+  final TextStyle? textStyle;
+
   /// Animation duration of show/hide numpad.
   /// Default is 300ms.
   ///
   final Duration duration;
 
+  /// Builder for num buttons.
+  ///
+  final NumButtonBuilder? numButtonBuilder;
+
+  /// Builder for delete button.
+  ///
+  final DeleteButtonBuilder? deleteButtonBuilder;
+
   /// Callback for when [number] key tapped.
   ///
-  final OnNumInput onNumInput;
+  final OnNumInput? onNumInput;
 
   /// Callback for delete key tapped.
   ///
@@ -45,7 +65,7 @@ class NumpadContainer extends StatefulWidget {
 class _NumpadContainerState extends State<NumpadContainer>
     with SingleTickerProviderStateMixin {
   late final AnimationController _animationController;
-  late final Animation<Offset> _animation;
+  late final Animation<Offset> _slideAnimation;
 
   @override
   void initState() {
@@ -56,7 +76,7 @@ class _NumpadContainerState extends State<NumpadContainer>
       duration: widget.duration,
     );
 
-    _animation = Tween<Offset>(
+    _slideAnimation = Tween<Offset>(
       begin: const Offset(0, 1),
       end: const Offset(0, 0),
     ).animate(_animationController);
@@ -82,22 +102,45 @@ class _NumpadContainerState extends State<NumpadContainer>
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Column(
+      body: Stack(
+        alignment: Alignment.bottomCenter,
         children: [
-          Expanded(child: widget.child),
-          SlideTransition(
-            position: _animation,
-            child: SizedBox(
-              height: widget.show ? widget.keyboardHeight : 0,
-              child: SafeArea(
-                top: false,
-                child: NumPad(
-                  onNumKeyTap: (numKey) => widget.onNumInput(numKey.number),
-                  onDelete: () => widget.onDelete(),
+          Positioned.fill(
+            child: Column(
+              children: [
+                Expanded(child: widget.child),
+                AnimatedContainer(
+                  duration: widget.duration,
+                  height: widget.show ? widget.keyboardHeight : 0,
                 ),
-              ),
+              ],
             ),
-          )
+          ),
+          SlideTransition(
+            position: _slideAnimation,
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.end,
+              children: [
+                Container(
+                  decoration: BoxDecoration(
+                    color: widget.backgroundColor,
+                  ),
+                  height: widget.keyboardHeight,
+                  child: SafeArea(
+                    top: false,
+                    child: NumPad(
+                      onNumKeyTap: (numKey) =>
+                          widget.onNumInput?.call(numKey.number),
+                      onDelete: () => widget.onDelete(),
+                      numButtonBuilder: widget.numButtonBuilder,
+                      deleteButtonBuilder: widget.deleteButtonBuilder,
+                      textStyle: widget.textStyle,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
         ],
       ),
     );

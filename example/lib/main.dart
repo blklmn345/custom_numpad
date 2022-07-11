@@ -25,24 +25,32 @@ class _MyAppState extends State<MyApp> {
       home: NumpadContainer(
         show: _show,
         duration: const Duration(milliseconds: 300),
-        onNumInput: (number) {
-          if (numbers.length < _maxLength) {
-            setState(() {
-              numbers.add(number);
-
-              if (numbers.length == _maxLength) {
-                _show = false;
-              }
-            });
-          }
-        },
-        onDelete: () {
-          if (numbers.isNotEmpty) {
-            setState(() {
-              numbers.removeLast();
-            });
-          }
-        },
+        backgroundColor: Colors.grey,
+        // numButtonBuilder: (context, number) {
+        //   return ElevatedButton(
+        //     style: ElevatedButton.styleFrom(
+        //       shape: const CircleBorder(),
+        //     ),
+        //     onPressed: () => _onInput(number),
+        //     child: Text(number.toString()),
+        //   );
+        // },
+        // deleteButtonBuilder: (context) {
+        //   return ElevatedButton(
+        //     style: ElevatedButton.styleFrom(
+        //       shape: const CircleBorder(),
+        //     ),
+        //     onPressed: () => _onDelete(),
+        //     child: const Text('del'),
+        //   );
+        // },
+        onNumInput: (number) => _onInput(number),
+        textStyle: const TextStyle(
+          color: Colors.white,
+          fontWeight: FontWeight.bold,
+          fontSize: 30,
+        ),
+        onDelete: () => _onDelete(),
         child: GestureDetector(
           onTap: () => setState(() {
             _show = false;
@@ -128,5 +136,25 @@ class _MyAppState extends State<MyApp> {
         ),
       ),
     );
+  }
+
+  void _onInput(int number) {
+    if (numbers.length < _maxLength) {
+      setState(() {
+        numbers.add(number);
+
+        if (numbers.length == _maxLength) {
+          _show = false;
+        }
+      });
+    }
+  }
+
+  void _onDelete() {
+    if (numbers.isNotEmpty) {
+      setState(() {
+        numbers.removeLast();
+      });
+    }
   }
 }
